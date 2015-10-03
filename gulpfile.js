@@ -18,7 +18,7 @@ function buildRelease() {
 	console.log('Building version ' + version);
 
 	multipipe(
-		gulp.src('src/**/*.js'),
+		gulp.src(['src/QueryBuilder.js', 'src/Query*.js']),
 		concat('query-builder.js'),
 		babel(babelOptions),
 		wrap(wrapper),

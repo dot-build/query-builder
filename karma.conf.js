@@ -10,13 +10,12 @@ module.exports = function(config) {
 		files: [
 			'bower_components/evt/dist/EventEmitter.js',
 			'bower_components/es6-collections/es6-collections.js',
-			'src/**/*.js',
-			'test/**/*.spec.js'
+			'src/QueryBuilder.js',
+			'src/Query*.js',
+			'test/*.spec.js'
 		],
 		preprocessors: {
-			'src/**/*.js': ['babel'],
-			// uncomment to enable ES6 on tests too
-			// 'test/**/*.js': ['babel']
+			'src/*.js': ['babel']
 		},
 		babelPreprocessor: {
 			options: babelOptions
