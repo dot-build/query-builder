@@ -1,0 +1,21 @@
+{
+  "name": "query-builder",
+  "description": "A general-purpose query builder",
+  "version": "0.0.0",
+  "main": "src/query-builder.js",
+  "author": {
+    "name": "Darlan Alves",
+    "email": "me@darlanalv.es"
+  },
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
+  "dependencies": {
+    "evt": "~0.2.0",
+    "es6-collections": "~0.5.5"
+  }
+}
