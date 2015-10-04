@@ -3,16 +3,14 @@
 
 	/* content goes here */
 
-	// TODO: replace MyLibrary with the actual library name
-
 	if (typeof define === 'function' && define.amd) {
 		define(function() {
-			return MyLibrary;
+			return QueryBuilder;
 		});
 	} else if (typeof module !== 'undefined' && module.exports) {
-		module.exports = MyLibrary;
+		module.exports = QueryBuilder;
 	} else {
-		global.MyLibrary = MyLibrary;
+		global.QueryBuilder = QueryBuilder;
 	}
 
 })(this);

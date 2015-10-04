@@ -19,7 +19,7 @@ Not there yet.
 ## Sample code
 
 ```
-var search = QueryBuilder.create()
+var query = QueryBuilder.create()
 
 	.where('name').eq('john')
 	.where('age').gt(30)
@@ -28,7 +28,36 @@ var search = QueryBuilder.create()
 	.skip(30)				// skip first 30 results
 	.limit(20)				// limit to 20 items
 
-	.sortBy('-name');		// descending order
+	.sort('name', true);	// descending order
+
+var search = query.toJSON();
+console.log(search);
+```
+
+The output looks like this:
+
+```
+{
+    "filters": [{
+        "name": "name",
+        "operator": "=",
+        "value": "john"
+    }, {
+        "name": "age",
+        "operator": ">",
+        "value": 30
+    }, {
+        "name": "interests",
+        "operator": "in",
+        "value": ["travel", "food", "sports"]
+    }],
+    "sorting": [
+        ["name", "desc"]
+    ],
+    "page": 1,
+    "skip": 30,
+    "limit": 20
+}
 ```
 
 ## Build
