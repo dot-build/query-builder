@@ -1,5 +1,9 @@
 class QueryBuilder {
 	constructor() {
+		this.reset();
+	}
+
+	reset() {
 		this.$$filters = [];
 
 		this.$$pagination = {
@@ -69,6 +73,8 @@ class QueryBuilder {
 		let pagination = this.$$pagination;
 		let filters = this.$$filters.map(mapper);
 		let sorting = [];
+
+		this.$$sorting.forEach((item) => sorting.push([ item[0], item[1] ]));
 
 		return {
 			filters,

@@ -116,6 +116,33 @@ describe('QueryBuilder', function() {
 		});
 	});
 
+	describe('#reset()', function() {
+		it('should clean up all the sorting and filtering rules and reset pagination', function () {
+			var query = QueryBuilder.create()
+				.where('name').eq('John')
+				.where('age').gt(30)
+				.sort('name')
+				.page(2)
+				.limit(30)
+				.skip(20);
+
+			query.reset();
+
+			var pagination = {
+				page: 1,
+				limit: 20,
+				skip: 0
+			};
+
+			var sorting = [];
+			var filters = [];
+
+			expect(query.$$filters).toEqual(filters);
+			expect(query.$$pagination).toEqual(pagination);
+			expect(query.$$sorting).toEqual(sorting);
+		});
+	});
+
 	describe('#limit(Number pageSize)', function() {
 		it('should set the page size', function() {
 			var query = QueryBuilder.create();
@@ -162,6 +189,8 @@ describe('QueryBuilder', function() {
 				.where('lastName').like('Doe')
 				.where('firsName').st('J')
 				.where('firsName').end('n')
+				.sort('name')
+				.sort('age', true)
 				.skip(15)
 				.limit(25)
 				.page(2);
@@ -213,7 +242,10 @@ describe('QueryBuilder', function() {
 					'operator': '$',
 					'value': 'n'
 				}],
-				'sorting': [],
+				'sorting': [
+					['name', 'asc'],
+					['age', 'desc']
+				],
 				'page': 2,
 				'skip': 15,
 				'limit': 25
@@ -236,6 +268,8 @@ describe('QueryBuilder', function() {
 				.where('lastName').like('Doe')
 				.where('firsName').st('J')
 				.where('firsName').end('n')
+				.sort('name')
+				.sort('age', true)
 				.skip(15)
 				.limit(25)
 				.page(2);
@@ -255,7 +289,10 @@ describe('QueryBuilder', function() {
 					['firsName', '^', 'J'],
 					['firsName', '$', 'n']
 				],
-				'sorting': [],
+				'sorting': [
+					['name', 'asc'],
+					['age', 'desc']
+				],
 				'page': 2,
 				'skip': 15,
 				'limit': 25
