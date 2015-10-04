@@ -1,5 +1,7 @@
 ## QueryBuilder
 
+[![Join the chat at https://gitter.im/darlanalves/query-builder](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/darlanalves/query-builder?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This is a generic search query builder. Its intent is to provide a standarized interface to build search queries, like those used in ORM systems or data layers like Hybernate, Doctrine or LINQ.
 
 Its syntax can be extended to add custom operators while keeping the same interface idea. Besides the search parameters, there is also a set of methods to add pagination information and sorting fields.
