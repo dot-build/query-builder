@@ -1,140 +1,185 @@
 class QueryBuilder {
-	constructor() {
-		this.reset();
-	}
+    constructor() {
+        this.reset();
+    }
 
-	reset() {
-		this.$$filters = [];
+    reset() {
+        this.$$filters = [];
+        this.$$select = [];
 
-		this.$$pagination = {
-			page: 1,
-			limit: QueryBuilder.DEFAULT_PAGE_SIZE,
-			skip: 0
-		};
+        this.$$pagination = {
+            page: 1,
+            limit: QueryBuilder.DEFAULT_PAGE_SIZE,
+            skip: 0
+        };
 
-		this.$$sorting = [];
-	}
+        this.$$sorting = [];
+    }
 
-	sort(field, reverse) {
-		let direction = reverse ? 'desc' : 'asc';
-		let rule = [field, direction];
+    sort(field, reverse) {
+        let direction = reverse ? 'desc' : 'asc';
+        let rule = [field, direction];
 
-		this.$$sorting.push(rule);
-		return this;
-	}
+        this.$$sorting.push(rule);
+        return this;
+    }
 
-	addFilter(name, operator, value) {
-		let found = this.$$filters.some(function (item) {
-			if (name === item.name && operator === item.operator) {
-				item.value = value;
-				return true;
-			}
-		});
+    addFilter(name, operator, value) {
+        let found = this.$$filters.some(function(item) {
+            if (name === item.name && operator === item.operator) {
+                item.value = value;
+                return true;
+            }
+        });
 
-		if (!found) {
-			let filter = {
-				name, operator, value
-			};
+        if (!found) {
+            let filter = {
+                name, operator, value
+            };
 
-			this.$$filters.push(filter);
-		}
-	}
+            this.$$filters.push(filter);
+        }
+    }
 
-	where(field) {
-		return QueryBuilderOperators.create(this, field);
-	}
+    select() {
+        let prefix, fields;
 
-	page(pageNumber) {
-		this.$$pagination.page = Number(pageNumber);
-		return this;
-	}
+        /**
+         * Cases:
+         *     select('single.field')
+         *     select('prefix', ['fields'])
+         *     select(['fields', 'array'])
+         */
 
-	skip(count) {
-		this.$$pagination.skip = Number(count);
-		return this;
-	}
+        if (arguments.length === 1) {
+            fields = arguments[0]
+        }
 
-	limit(pageSize) {
-		this.$$pagination.limit = Number(pageSize);
-		return this;
-	}
+        if (typeof fields === 'string') {
+            fields = [fields];
+        }
 
-	toJSON() {
-		let mapper = function(item) { return { name: item.name, operator: item.operator, value: item.value }; };
-		return this.serialize(mapper);
-	}
+        if (arguments.length === 2) {
+            prefix = arguments[0];
+            fields = arguments[1];
+            fields = fields.map(field => `${prefix}.${field}`);
+        }
 
-	toJSONArray() {
-		let mapper = function(item) { return [ item.name, item.operator, item.value ]; };
-		return this.serialize(mapper);
-	}
+        if (!Array.isArray(fields)) {
+            throw new TypeError('Invalid fields. Must be an array of strings');
+        }
 
-	serialize(mapper) {
-		let pagination = this.$$pagination;
-		let filters = this.$$filters.map(mapper);
-		let sorting = [];
+        this.$$select.push.apply(this.$$select, fields);
+        return this;
+    }
 
-		this.$$sorting.forEach((item) => sorting.push([ item[0], item[1] ]));
+    where(field) {
+        return QueryBuilderOperators.create(this, field);
+    }
 
-		return {
-			filters,
-			sorting,
-			page: pagination.page,
-			skip: pagination.skip,
-			limit: pagination.limit
-		};
-	}
+    page(pageNumber) {
+        this.$$pagination.page = Number(pageNumber);
+        return this;
+    }
 
-	static create() {
-		return new QueryBuilder();
-	}
+    skip(count) {
+        this.$$pagination.skip = Number(count);
+        return this;
+    }
+
+    limit(pageSize) {
+        this.$$pagination.limit = Number(pageSize);
+        return this;
+    }
+
+    toJSON() {
+        let filterMapper = function(item) {
+            return {
+                name: item.name,
+                operator: item.operator,
+                value: item.value
+            };
+        };
+
+        return this.serialize(filterMapper);
+    }
+
+    toJSONArray() {
+        let filterMapper = function(item) {
+            return [item.name, item.operator, item.value];
+        };
+
+        return this.serialize(filterMapper);
+    }
+
+    serialize(mapper) {
+        let pagination = this.$$pagination;
+        let filters = this.$$filters.map(mapper);
+        let sorting = [];
+        let fields = this.$$select.slice();
+
+        this.$$sorting.forEach((item) => sorting.push([item[0], item[1]]));
+
+        return {
+            filters,
+            sorting,
+            fields: fields,
+                page: pagination.page,
+                skip: pagination.skip,
+                limit: pagination.limit
+        };
+    }
+
+    static create() {
+        return new QueryBuilder();
+    }
 }
 
 QueryBuilder.DEFAULT_PAGE_SIZE = 20;
 
 class QueryBuilderOperators {
-	constructor(query, field) {
-		this.$$query = query;
-		this.$$field = field;
-	}
+    constructor(query, field) {
+        this.$$query = query;
+        this.$$field = field;
+    }
 
-	static create(query, field) {
-		return new QueryBuilderOperators(query, field);
-	}
+    static create(query, field) {
+        return new QueryBuilderOperators(query, field);
+    }
 
-	static add(name, symbol) {
-		let prototype = QueryBuilderOperators.prototype;
+    static add(name, symbol) {
+        let prototype = QueryBuilderOperators.prototype;
 
-		if (name in prototype) {
-			throw new Error('Operator already exists: ' + name);
-		}
+        if (name in prototype) {
+            throw new Error('Operator already exists: ' + name);
+        }
 
-		prototype[name] = operatorFunction;
+        prototype[name] = operatorFunction;
 
-		/* jshint validthis: true */
-		function operatorFunction(value) {
-			this.$$query.addFilter(this.$$field, symbol, value);
-			return this.$$query;
-		}
-	}
+        /* jshint validthis: true */
+        function operatorFunction(value) {
+            this.$$query.addFilter(this.$$field, symbol, value);
+            return this.$$query;
+        }
+    }
 }
 
 // Built-in operators:
 // lt, lte, gt, gte, in, eq, ne, like, st, end
 let builtinOperators = {
-	'lt': '<',
-	'lte': '<=',
-	'gt': '>',
-	'gte': '>=',
-	'in': 'in',
-	'eq': '=',
-	'ne': '!=',
-	'like': '~',
-	'st': '^',
-	'end': '$'
+    'lt': '<',
+    'lte': '<=',
+    'gt': '>',
+    'gte': '>=',
+    'in': 'in',
+    'eq': '=',
+    'ne': '!=',
+    'like': '~',
+    'st': '^',
+    'end': '$'
 };
 
 Object.keys(builtinOperators).forEach(function(name) {
-	let symbol = builtinOperators[name];
-	QueryBuilderOperators.add(name, symbol);
+    let symbol = builtinOperators[name];
+    QueryBuilderOperators.add(name, symbol);
 });
