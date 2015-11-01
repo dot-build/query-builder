@@ -1,7 +1,7 @@
 {
   "name": "query-builder",
   "description": "A general-purpose query builder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "src/query-builder.js",
   "author": {
     "name": "Darlan Alves",
